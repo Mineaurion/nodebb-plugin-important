@@ -132,6 +132,9 @@ function toggleImportantStatus(tid, callback) {
 
 		async.parallel([
             function(next) {
+                topics.setTopicField(tid, 'isImportant', isImportant ? 0 : 1, next);
+            },
+            function(next) {
                 if (!isImportant) {
 					db.sortedSetAdd('topics:important', Date.now(), tid, next);
                 } else {
