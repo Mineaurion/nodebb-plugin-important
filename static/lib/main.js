@@ -40,13 +40,13 @@ $('document').ready(function() {
 	});
 
 	function addHandlers() {
-		$('.toggleImportant').on('click', toggleImportant);
+		$('.toggleImportantStatus').on('click', toggleImportant);
 	}
 
 	function addLabel() {
 		if (ajaxify.data.hasOwnProperty('isImportant') && parseInt(ajaxify.data.isImportant, 10) === 1) {
 			require(['components'], function(components) {
-				components.get('post/header').prepend('<span class="important"><i class="fa fa-exclamation"></i> Important</span>');
+				components.get('post/header').prepend('<span class="important"><i class="fa fa-exclamation"></i> Mark as Important</span>');
 			});
 		}
 	}
