@@ -67,7 +67,7 @@ plugin.getTopics = function(data, callback) {
 
 	async.map(topics, function(topic, next) {
 		if (parseInt(topic.isQuestion, 10)) {
-			if (parseInt(topic.isSolved, 10)) {
+			if (parseInt(topic.isImportant, 10)) {
 				topic.title = '<span class="important"><i class="fa fa-exclamation"></i> Important</span> ' + topic.title;
 			}
 		}
@@ -79,11 +79,24 @@ plugin.getTopics = function(data, callback) {
 };
 
 plugin.addThreadTool = function(data, callback) {
+
+    var isImportant = parseInt(data.topic.isImportant, 10);
+
+    if (parseInt(data.topic.isImportant, 10)) {
+        data.tools = data.tools.concat([
+            {
+                class: 'toggleImportantStatus',
+                title: 'Remove Important status',
+                icon: 'fa-comments'
+            }
+        ]);
+	} else {
 		data.tools.push({
 			class: 'toggleImportantStatus alert-danger',
-			title: 'Important',
+			title: 'Mark as important',
 			icon: 'fa-exclamation'
 		});
+	}
 	callback(false, data);
 };
 
@@ -108,12 +121,7 @@ function handleSocketIO() {
 			if (!isAdminOrMod) {
 				return callback(new Error('[[error:no-privileges]]'));
 			}
-
-			if (data.pid) {
-				toggleImportant(data.tid, data.pid, callback);
-			} else {
-                toggleImportant(data.tid, callback);
-			}
+			toggleImportant(data.tid, callback);
 		});
 	};
 }
@@ -123,30 +131,15 @@ function toggleImportant(tid, callback) {
         isImportant = parseInt(isImportant, 10) === 1;
 
 		async.parallel([
-			function(next) {
-				topics.setTopicField(tid, 'isImportant', isImportant ? 0 : 1, next);
-			},
-			function(next) {
-				if (!isImportant) {
-					async.parallel([
-						function(next) {
-							topics.setTopicField(tid, 'isImportant', 0, next);
-						},
-						function(next) {
-							db.sortedSetAdd('topics:important', Date.now(), tid, next);
-						},
-						function(next) {
-							db.sortedSetRemove('topics:important', tid, next);
-						}
-					], next);
-				} else {
-					db.sortedSetRemove('topics:important', tid, function() {
-						db.sortedSetRemove('topics:important', tid, next);
-					});
-				}
-			}
+            function(next) {
+                if (!isImportant) {
+					db.sortedSetAdd('topics:important', Date.now(), tid, next);
+                } else {
+					db.sortedSetRemove('topics:important', tid, next);
+                }
+            }
 		], function(err) {
-			callback(err, {isQuestion: !isImportant});
+			callback(err, {isImportant: !isImportant});
 		});
 	});	
 }
