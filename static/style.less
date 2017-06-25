@@ -1,16 +1,12 @@
 @import "mods/nodebb-plugin-recent-cards";
 
-.answered {
-	border: 1px solid @brand-success;
-	color: @brand-success;
+.important {
+	border: 1px solid @brand-danger;
+	color: @brand-danger;
 }
 
-.unanswered {
-	border: 1px solid @brand-warning;
-	color: @brand-warning;
-}
 
-.unanswered, .answered {
+.important {
 	text-transform: uppercase;
 	font-size: 10px;
 	padding: 2px 5px;
@@ -22,27 +18,18 @@
 }
 
 .breadcrumb {
-	.answered, .unanswered {
+	.important {
 		display: none;
 	}
 }
 
 html .topic {
-	.answered {
-		color: @brand-success;
+	.important {
+		color: @brand-danger;
 	}
 
-	.unanswered {
-		color: @brand-warning;
-	}
-
-	.answered, .unanswered {
+	.important {
 		padding: 2px 8px;
 		vertical-align: 21%;
 	}
-}
-
-.posts [component="post"].isSolved {
-	border: 8px solid lighten(@brand-success, 30%);
-	padding: 20px;
 }

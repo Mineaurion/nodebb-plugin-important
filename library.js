@@ -19,14 +19,11 @@ plugin.init = function(params, callback) {
 		middleware = params.middleware,
 		controllers = params.controllers;
 
-	app.get('/admin/plugins/question-and-answer', middleware.admin.buildHeader, renderAdmin);
-	app.get('/api/admin/plugins/question-and-answer', renderAdmin);
+	app.get('/admin/plugins/important', middleware.admin.buildHeader, renderAdmin);
+	app.get('/api/admin/plugins/important', renderAdmin);
 
-	app.get('/unsolved', middleware.buildHeader, renderUnsolved);
-	app.get('/api/unsolved', renderUnsolved);
-
-	app.get('/solved', middleware.buildHeader, renderSolved);
-	app.get('/api/solved', renderSolved);
+	app.get('/important', middleware.buildHeader, renderImportant);
+	app.get('/api/important', renderImportant);
 
 	handleSocketIO();
 
@@ -34,8 +31,8 @@ plugin.init = function(params, callback) {
 };
 
 plugin.appendConfig = function(config, callback) {
-	meta.settings.get('question-and-answer', function(err, settings) {
-		config['question-and-answer'] = settings;
+	meta.settings.get('important', function(err, settings) {
+		config['important'] = settings;
 		callback(null, config);
 	});
 };
@@ -44,16 +41,10 @@ plugin.addNavigation = function(menu, callback) {
 	menu = menu.concat(
 		[
 			{
-				"route": "/unsolved",
-				"title": "Unsolved",
-				"iconClass": "fa-question-circle",
-				"text": "Unsolved"
-			},
-			{
-				"route": "/solved",
-				"title": "Solved",
-				"iconClass": "fa-check-circle",
-				"text": "Solved"
+				"route": "/important",
+				"title": "Important",
+				"iconClass": "fa-exclamation",
+				"text": "Important"
 			}
 		]
 	);
@@ -63,9 +54,9 @@ plugin.addNavigation = function(menu, callback) {
 
 plugin.addAdminNavigation = function(header, callback) {
 	header.plugins.push({
-		route: '/plugins/question-and-answer',
-		icon: 'fa-question-circle',
-		name: 'Q&A'
+		route: '/plugins/important',
+		icon: 'fa-exclamation',
+		name: 'Important'
 	});
 
 	callback(null, header);
@@ -77,9 +68,7 @@ plugin.getTopics = function(data, callback) {
 	async.map(topics, function(topic, next) {
 		if (parseInt(topic.isQuestion, 10)) {
 			if (parseInt(topic.isSolved, 10)) {
-				topic.title = '<span class="answered"><i class="fa fa-question-circle"></i> Solved</span> ' + topic.title;
-			} else {
-				topic.title = '<span class="unanswered"><i class="fa fa-question-circle"></i> Unsolved</span> ' + topic.title;
+				topic.title = '<span class="important"><i class="fa fa-exclamation"></i> Important</span> ' + topic.title;
 			}
 		}
 		
@@ -90,56 +79,12 @@ plugin.getTopics = function(data, callback) {
 };
 
 plugin.addThreadTool = function(data, callback) {
-	var isSolved = parseInt(data.topic.isSolved, 10);
-
-	if (parseInt(data.topic.isQuestion, 10)) {
-		data.tools = data.tools.concat([
-			{
-				class: 'toggleSolved ' + (isSolved ? 'alert-warning topic-solved' : 'alert-success topic-unsolved'),
-				title: isSolved ? 'Mark as Unsolved' : 'Mark as Solved',
-				icon: isSolved ? 'fa-question-circle' : 'fa-check-circle'
-			},
-			{
-				class: 'toggleQuestionStatus',
-				title: 'Make this a normal topic',
-				icon: 'fa-comments'
-			}
-		]);	
-	} else {
 		data.tools.push({
-			class: 'toggleQuestionStatus alert-warning',
-			title: 'Ask as question',
-			icon: 'fa-question-circle'
+			class: 'toggleImportantStatus alert-danger',
+			title: 'Important',
+			icon: 'fa-exclamation'
 		});
-	}
-	
 	callback(false, data);
-};
-
-plugin.addPostTool = function(postData, callback) {
-	topics.getTopicDataByPid(postData.pid, function(err, data) {
-		data.isSolved = parseInt(data.isSolved, 10) === 1;
-		data.isQuestion = parseInt(data.isQuestion, 10) === 1;
-
-		if (data.uid && !data.isSolved && data.isQuestion && parseInt(data.mainPid, 10) !== parseInt(postData.pid, 10)) {		
-			postData.tools.push({
-				"action": "qanda/post-solved",
-				"html": "Mark this post as the correct answer",
-				"icon": "fa-check-circle"
-			});
-		}
-
-		callback(false, postData);
-	});
-};
-
-plugin.getConditions = function(conditions, callback) {
-	conditions.push({
-		"name": "Times questions accepted",
-		"condition": "qanda/question.accepted"
-	});
-
-	callback(false, conditions);
 };
 
 function renderAdmin(req, res, next) {
@@ -149,125 +94,64 @@ function renderAdmin(req, res, next) {
 			categories.getCategoriesFields(cids, ['cid', 'name'], next);
 		}
 	], function(err, data) {
-		res.render('admin/plugins/question-and-answer', {
+		res.render('admin/plugins/important', {
 			categories: data
 		});
 	});
 }
 
 function handleSocketIO() {
-	SocketPlugins.QandA = {};
+	SocketPlugins.Important = {};
 
-	SocketPlugins.QandA.toggleSolved = function(socket, data, callback) {
-		privileges.topics.canEdit(data.tid, socket.uid, function(err, canEdit) {
-			if (!canEdit) {
+	SocketPlugins.Important.toggleImportant = function(socket, data, callback) {
+		privileges.topics.isAdminOrMod(data.tid, socket.uid, function(err, canEdit) {
+			if (!isAdminOrMod) {
 				return callback(new Error('[[error:no-privileges]]'));
 			}
 
 			if (data.pid) {
-				toggleSolved(data.tid, data.pid, callback);
+				toggleImportant(data.tid, data.pid, callback);
 			} else {
-				toggleSolved(data.tid, callback);
+                toggleImportant(data.tid, callback);
 			}
-		});
-	};
-
-	SocketPlugins.QandA.toggleQuestionStatus = function(socket, data, callback) {
-		privileges.topics.canEdit(data.tid, socket.uid, function(err, canEdit) {
-			if (!canEdit) {
-				return callback(new Error('[[error:no-privileges]]'));
-			}
-
-			toggleQuestionStatus(data.tid, callback);
 		});
 	};
 }
 
-function toggleSolved(tid, pid, callback) {
-	if (!callback) {
-		callback = pid;
-		pid = false;
-	}
-
-	topics.getTopicField(tid, 'isSolved', function(err, isSolved) {
-		isSolved = parseInt(isSolved, 10) === 1;
+function toggleImportant(tid, callback) {
+	topics.getTopicField(tid, 'isImportant', function(err, isImportant) {
+        isImportant = parseInt(isImportant, 10) === 1;
 
 		async.parallel([
 			function(next) {
-				topics.setTopicField(tid, 'isSolved', isSolved ? 0 : 1, next);
+				topics.setTopicField(tid, 'isImportant', isImportant ? 0 : 1, next);
 			},
 			function(next) {
-				if (!isSolved && pid) {
-					topics.setTopicField(tid, 'solvedPid', pid, next);
-				} else {
-					topics.deleteTopicField(tid, 'solvedPid', next);
-				}
-			},
-			function(next) {
-				if (!isSolved && pid) {
-					posts.getPostData(pid, function(err, data) {
-						rewards.checkConditionAndRewardUser(data.uid, 'qanda/question.accepted', function(callback) {
-							user.incrementUserFieldBy(data.uid, 'qanda/question.accepted', 1, callback);
-						});
-
-						next();
-					});
-				} else {
-					next();
-				}
-			},
-			function(next) {
-				if (!isSolved) {
-					db.sortedSetRemove('topics:unsolved', tid, function() {
-						db.sortedSetAdd('topics:solved', Date.now(), tid, next);
-					});
-				} else {
-					db.sortedSetAdd('topics:unsolved', Date.now(), tid, function() {
-						db.sortedSetRemove('topics:solved', tid, next);
-					});
-				}
-			}
-		], function(err) {
-			callback(err, {isSolved: !isSolved});
-		});
-	});
-}
-
-function toggleQuestionStatus(tid, callback) {
-	topics.getTopicField(tid, 'isQuestion', function(err, isQuestion) {
-		isQuestion = parseInt(isQuestion, 10) === 1;
-
-		async.parallel([
-			function(next) {
-				topics.setTopicField(tid, 'isQuestion', isQuestion ? 0 : 1, next);
-			},
-			function(next) {
-				if (!isQuestion) {
+				if (!isImportant) {
 					async.parallel([
 						function(next) {
-							topics.setTopicField(tid, 'isSolved', 0, next);
+							topics.setTopicField(tid, 'isImportant', 0, next);
 						},
 						function(next) {
-							db.sortedSetAdd('topics:unsolved', Date.now(), tid, next);
+							db.sortedSetAdd('topics:important', Date.now(), tid, next);
 						},
 						function(next) {
-							db.sortedSetRemove('topics:solved', tid, next);
+							db.sortedSetRemove('topics:important', tid, next);
 						}
 					], next);
 				} else {
-					db.sortedSetRemove('topics:unsolved', tid, function() {
-						db.sortedSetRemove('topics:solved', tid, next);
-						topics.deleteTopicField(tid, 'solvedPid');
+					db.sortedSetRemove('topics:important', tid, function() {
+						db.sortedSetRemove('topics:important', tid, next);
 					});
 				}
 			}
 		], function(err) {
-			callback(err, {isQuestion: !isQuestion});
+			callback(err, {isQuestion: !isImportant});
 		});
 	});	
 }
 
-function renderUnsolved(req, res, next) {
+function renderImportant(req, res, next) {
 	var page = parseInt(req.query.page, 10) || 1;
 	var pageCount = 1;
 	var stop = 0;
@@ -281,7 +165,7 @@ function renderUnsolved(req, res, next) {
 					user.getSettings(req.uid, next);
 				},
 				tids: function (next) {
-					db.getSortedSetRevRange('topics:unsolved', 0, 199, next);
+					db.getSortedSetRevRange('topics:important', 0, 199, next);
 				}
 			}, next);
 		},
@@ -307,66 +191,14 @@ function renderUnsolved(req, res, next) {
 		var data = {};
 		data.topics = topics;
 		data.nextStart = stop + 1;
-		data.set = 'topics:unsolved';
+		data.set = 'topics:important';
 		data['feeds:disableRSS'] = true;
 		data.pagination = pagination.create(page, pageCount);
-		if (req.path.startsWith('/api/unsolved') || req.path.startsWith('/unsolved')) {
-			data.breadcrumbs = helpers.buildBreadcrumbs([{text: 'Unsolved'}]);
+		if (req.path.startsWith('/api/important') || req.path.startsWith('/important')) {
+			data.breadcrumbs = helpers.buildBreadcrumbs([{text: 'Important'}]);
 		}
 		
 		res.render('recent', data);
 	});
 }
-
-function renderSolved(req, res, next) {
-	var page = parseInt(req.query.page, 10) || 1;
-	var pageCount = 1;
-	var stop = 0;
-	var topicCount = 0;
-	var settings;
-	
-	async.waterfall([
-		function (next) {
-			async.parallel({
-				settings: function(next) {
-					user.getSettings(req.uid, next);
-				},
-				tids: function (next) {
-					db.getSortedSetRevRange('topics:solved', 0, 199, next);
-				}
-			}, next);
-		},
-		function (results, next) {
-			settings = results.settings;
-			privileges.topics.filterTids('read', results.tids, req.uid, next);
-		},
-		function (tids, next) {
-			var start = Math.max(0, (page - 1) * settings.topicsPerPage);
-			stop = start + settings.topicsPerPage - 1;
-
-			topicCount = tids.length;
-			pageCount = Math.max(1, Math.ceil(topicCount / settings.topicsPerPage));
-			tids = tids.slice(start, stop + 1);
-
-			topics.getTopicsByTids(tids, req.uid, next);
-		}
-	], function(err, topics) {
-		if (err) {
-			return next(err);
-		}
-		
-		var data = {};
-		data.topics = topics;
-		data.nextStart = stop + 1;
-		data.set = 'topics:solved';
-		data['feeds:disableRSS'] = true;
-		data.pagination = pagination.create(page, pageCount);
-		if (req.path.startsWith('/api/solved') || req.path.startsWith('/solved')) {
-			data.breadcrumbs = helpers.buildBreadcrumbs([{text: 'Solved'}]);
-		}
-		
-		res.render('recent', data);
-	});
-}
-
 module.exports = plugin;
