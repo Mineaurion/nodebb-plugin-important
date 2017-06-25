@@ -66,7 +66,7 @@ plugin.getTopics = function(data, callback) {
 	var topics = data.topics;
 
 	async.map(topics, function(topic, next) {
-		if (parseInt(topic.isQuestion, 10)) {
+		if (parseInt(topic.isImportant, 10)) {
 			if (parseInt(topic.isImportant, 10)) {
 				topic.title = '<span class="important"><i class="fa fa-exclamation"></i> Important</span> ' + topic.title;
 			}

@@ -58,9 +58,6 @@ $('document').ready(function() {
 
 	function callToggleImportant(tid, refresh) {
 		socket.emit('plugins.Important.toggleImportantStatus', {tid: tid}, function(err, data) {
-			console.log(err);
-			console.log("Data");
-			console.log(data);
 			app.alertSuccess(data.isImportant ? 'Topic has been marked as important' : 'Topic is now a regular thread');
 			if (refresh) {
 				ajaxify.refresh();
