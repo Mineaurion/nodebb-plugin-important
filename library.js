@@ -116,17 +116,17 @@ function renderAdmin(req, res, next) {
 function handleSocketIO() {
 	SocketPlugins.Important = {};
 
-	SocketPlugins.Important.toggleImportant = function(socket, data, callback) {
-		privileges.topics.isAdminOrMod(data.tid, socket.uid, function(err, canEdit) {
+	SocketPlugins.Important.toggleImportantStatus = function(socket, data, callback) {
+		privileges.topics.isAdminOrMod(data.tid, socket.uid, function(err, isAdminOrMod) {
 			if (!isAdminOrMod) {
 				return callback(new Error('[[error:no-privileges]]'));
 			}
-			toggleImportant(data.tid, callback);
+			toggleImportantStatus(data.tid, callback);
 		});
 	};
 }
 
-function toggleImportant(tid, callback) {
+function toggleImportantStatus(tid, callback) {
 	topics.getTopicField(tid, 'isImportant', function(err, isImportant) {
         isImportant = parseInt(isImportant, 10) === 1;
 
