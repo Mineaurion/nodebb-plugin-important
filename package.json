@@ -1,26 +1,30 @@
 {
-  "name": "nodebb-plugin-question-and-answer",
-  "version": "0.1.4",
-  "description": "A nodebb-plugin-question-and-answer plugin for NodeBB which allows users to post topics as questions and select a post as the answer",
+  "name": "nodebb-plugin-important",
+  "version": "0.1.0",
+  "description": "A nodebb-plugin-important plugin for NodeBB which allows admin to post topics as important",
   "main": "library.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/psychobunny/nodebb-plugin-question-and-answer"
+    "url": "https://github.com/Mineaurion/nodebb-plugin-important"
   },
   "keywords": [
     "nodebb",
     "plugin",
-    "question",
-    "answer",
-    "Q&A"
+    "important",
   ],
   "author": {
     "name": "psychobunny",
     "email": "psycho.bunny@hotmail.com"
   },
+  "contributors": [
+    {
+      "name": "Yann151924",
+      "email": "yann@mineaurion.com"
+    }
+  ],
   "license": "BSD-2-Clause",
   "bugs": {
-    "url": "https://github.com/psychobunny/nodebb-plugin-question-and-answer/issues"
+    "url": "https://github.com/Mineaurion/nodebb-plugin-important/issues"
   },
   "readmeFilename": "README.md",
   "nbbpm": {
