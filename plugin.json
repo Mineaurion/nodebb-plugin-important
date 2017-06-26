@@ -1,8 +1,8 @@
 {
-	"id": "nodebb-plugin-question-and-answer",
-	"name": "Question and Answer Plugin for NodeBB",
-	"description": "A nodebb-plugin-question-and-answer plugin for NodeBB which allows users to post topics as questions and select a post as the answe",
-	"url": "https://github.com/NodeBB/nodebb-plugin-nodebb-plugin-question-and-answer",
+	"id": "nodebb-plugin-important",
+	"name": "Important Topic Plugin for NodeBB",
+	"description": "A nodebb-plugin-important plugin for NodeBB which allows admin to post topics as important",
+	"url": "https://github.com/Mineaurion/nodebb-plugin-important",
 	"library": "./library.js",
 	"hooks": [
 		{

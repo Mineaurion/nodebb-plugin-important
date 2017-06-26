@@ -1,6 +1,7 @@
 <form role="form" class="question-and-answer-settings">
 	<div class="row">
 		<div class="col-sm-2 col-xs-12 settings-header">General Settings</div>
+			No settings for now.
 		</div>
 	</div>
 </form>
