@@ -48,7 +48,6 @@ plugin.addNavigation = function(menu, callback) {
 			}
 		]
 	);
-
 	callback (null, menu);
 };
 
@@ -58,7 +57,6 @@ plugin.addAdminNavigation = function(header, callback) {
 		icon: 'fa-exclamation-circle',
 		name: 'Important'
 	});
-
 	callback(null, header);
 };
 
@@ -82,7 +80,7 @@ plugin.addThreadTool = function(data, callback) {
 
     var isImportant = parseInt(data.topic.isImportant, 10);
 
-    if (parseInt(data.topic.isImportant, 10)) {
+	if (parseInt(data.topic.isImportant, 10)) {
         data.tools = data.tools.concat([
             {
                 class: 'toggleImportantStatus',
