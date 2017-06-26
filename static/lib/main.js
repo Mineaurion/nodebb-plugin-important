@@ -11,34 +11,6 @@ $('document').ready(function() {
 
 	$(window).on('action:topic.tools.load', addHandlers);
 
-	$(window).on('action:composer.loaded', function(err, data) {
-		if (data.hasOwnProperty('composerData') && !data.composerData.isMain) {
-			// Do nothing, as this is a reply, not a new post
-			return;
-		}
-
-		var item = $('<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button><ul class="dropdown-menu pull-right" role="menu"><li><a href="#" data-switch-action="post"><i class="fa fa-fw fa-exclamation-circle"></i> Mark as Important</a></li></ul>');
-		var actionBar = $('#cmp-uuid-' + data.post_uuid + ' .action-bar');
-
-		item.on('click', 'li', function() {
-			$(window).off('action:composer.topics.post').one('action:composer.topics.post', function(ev, data) {
-				callToggleImportant(data.data.tid,false);
-			});
-		});
-
-		if (
-			config['important'].forceQuestions === 'on' ||
-			(config['important']['defaultCid_' + data.composerData.cid] === 'on')
-		) {
-			$('.composer-submit').attr('data-action', 'post').html('<i class="fa fa-fw fa-exclamation-circle"></i> Important</a>');
-			$(window).off('action:composer.topics.post').one('action:composer.topics.post', function(ev, data) {
-				callToggleImportant(data.data.tid, false);
-			});
-		} else {
-			actionBar.append(item);
-		}
-	});
-
 	function addHandlers() {
 		$('.toggleImportantStatus').on('click', toggleImportant);
 	}
