@@ -87,13 +87,13 @@ plugin.addThreadTool = function(data, callback) {
             {
                 class: 'toggleImportantStatus',
                 title: 'Remove Important status',
-                icon: 'fa-exclamation-circle'
+                icon: 'fa-minus-circle'
             }
         ]);
 	} else {
 		data.tools.push({
 			class: 'toggleImportantStatus alert-danger',
-			title: 'Mark as important',
+			title: 'Mark as Important',
 			icon: 'fa-exclamation-circle'
 		});
 	}
