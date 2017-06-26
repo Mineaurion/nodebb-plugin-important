@@ -17,7 +17,7 @@ $('document').ready(function() {
 			return;
 		}
 
-		var item = $('<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button><ul class="dropdown-menu pull-right" role="menu"><li><a href="#" data-switch-action="post"><i class="fa fa-fw fa-exclamation"></i> Mark as Important</a></li></ul>');
+		var item = $('<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button><ul class="dropdown-menu pull-right" role="menu"><li><a href="#" data-switch-action="post"><i class="fa fa-fw fa-exclamation-circle"></i> Mark as Important</a></li></ul>');
 		var actionBar = $('#cmp-uuid-' + data.post_uuid + ' .action-bar');
 
 		item.on('click', 'li', function() {
@@ -30,7 +30,7 @@ $('document').ready(function() {
 			config['important'].forceQuestions === 'on' ||
 			(config['important']['defaultCid_' + data.composerData.cid] === 'on')
 		) {
-			$('.composer-submit').attr('data-action', 'post').html('<i class="fa fa-fw fa-exclamation"></i> Important</a>');
+			$('.composer-submit').attr('data-action', 'post').html('<i class="fa fa-fw fa-exclamation-circle"></i> Important</a>');
 			$(window).off('action:composer.topics.post').one('action:composer.topics.post', function(ev, data) {
 				callToggleImportant(data.data.tid, false);
 			});
@@ -46,7 +46,7 @@ $('document').ready(function() {
 	function addLabel() {
 		if (ajaxify.data.hasOwnProperty('isImportant') && parseInt(ajaxify.data.isImportant, 10) === 1) {
 			require(['components'], function(components) {
-				components.get('post/header').prepend('<span class="important"><i class="fa fa-exclamation"></i> Important</span>');
+				components.get('post/header').prepend('<span class="important"><i class="fa fa-exclamation-circle"></i> Important</span>');
 			});
 		}
 	}

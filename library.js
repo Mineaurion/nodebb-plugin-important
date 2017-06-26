@@ -43,7 +43,7 @@ plugin.addNavigation = function(menu, callback) {
 			{
 				"route": "/important",
 				"title": "Important",
-				"iconClass": "fa-exclamation",
+				"iconClass": "fa-exclamation-circle",
 				"text": "Important"
 			}
 		]
@@ -55,7 +55,7 @@ plugin.addNavigation = function(menu, callback) {
 plugin.addAdminNavigation = function(header, callback) {
 	header.plugins.push({
 		route: '/plugins/important',
-		icon: 'fa-exclamation',
+		icon: 'fa-exclamation-circle',
 		name: 'Important'
 	});
 
@@ -68,7 +68,7 @@ plugin.getTopics = function(data, callback) {
 	async.map(topics, function(topic, next) {
 		if (parseInt(topic.isImportant, 10)) {
 			if (parseInt(topic.isImportant, 10)) {
-				topic.title = '<span class="important"><i class="fa fa-exclamation"></i> Important</span> ' + topic.title;
+				topic.title = '<span class="important"><i class="fa fa-exclamation-circle"></i> Important</span> ' + topic.title;
 			}
 		}
 		
@@ -87,14 +87,14 @@ plugin.addThreadTool = function(data, callback) {
             {
                 class: 'toggleImportantStatus',
                 title: 'Remove Important status',
-                icon: 'fa-comments'
+                icon: 'fa-exclamation-circle'
             }
         ]);
 	} else {
 		data.tools.push({
 			class: 'toggleImportantStatus alert-danger',
 			title: 'Mark as important',
-			icon: 'fa-exclamation'
+			icon: 'fa-exclamation-circle'
 		});
 	}
 	callback(false, data);
